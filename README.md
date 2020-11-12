@@ -1,8 +1,8 @@
 # Go Stream
 [![GoDoc](https://godoc.org/github.com/youthlin/stream?status.svg)](https://godoc.org/github.com/youthlin/stream)
 [![Go Report Card](https://goreportcard.com/badge/github.com/youthlin/stream)](https://goreportcard.com/report/github.com/youthlin/stream)
-[![Build Status](https://travis-ci.org/YouthLin/stream.svg?branch=main)](https://travis-ci.org/YouthLin/stream)
-[![codecov](https://codecov.io/gh/YouthLin/stream/branch/main/graph/badge.svg?token=1CqmLWbsYL)](https://codecov.io/gh/YouthLin/stream)
+[![Build Status](https://travis-ci.org/youthlin/stream.svg?branch=main)](https://travis-ci.org/youthlin/stream)
+[![codecov](https://codecov.io/gh/youthlin/stream/branch/main/graph/badge.svg?token=1CqmLWbsYL)](https://codecov.io/gh/youthlin/stream)
 
 Go Stream, like Java 8 Stream.
 
