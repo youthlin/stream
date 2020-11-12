@@ -1,5 +1,5 @@
 # Go Stream
-[![GoDoc](https://godoc.org/github.com/youthlin/stream?status.svg)](https://godoc.org/github.com/youthlin/stream)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/youthlin/stream)](https://pkg.go.dev/github.com/youthlin/stream)
 [![Go Report Card](https://goreportcard.com/badge/github.com/youthlin/stream)](https://goreportcard.com/report/github.com/youthlin/stream)
 [![Build Status](https://travis-ci.org/youthlin/stream.svg?branch=main)](https://travis-ci.org/youthlin/stream)
 [![codecov](https://codecov.io/gh/youthlin/stream/branch/main/graph/badge.svg?token=1CqmLWbsYL)](https://codecov.io/gh/youthlin/stream)
@@ -13,8 +13,8 @@ Blog Post: https://youthlin.com/?p=1755
 go get github.com/youthlin/stream
 ```
 
-国内镜像: https://gitee.com/youthlin/stream
-在 `go.mod` 中引入模块路径 `github.com/youthlin/stream` 及版本后，
+国内镜像: https://gitee.com/youthlin/stream  
+在 `go.mod` 中引入模块路径 `github.com/youthlin/stream` 及版本后，  
 再添加 replace 即可：
 ```go
 // go.mod
