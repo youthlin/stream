@@ -34,7 +34,13 @@ type (
 var (
 	// IntComparator is a Comparator for int
 	IntComparator Comparator = func(left, right T) int {
-		return left.(int) - right.(int)
+		if left.(int) < right.(int) {
+			return -1
+		}
+		if left.(int) > right.(int) {
+			return 1
+		}
+		return 0
 	}
 	// Int64Comparator is a Comparator for int64
 	Int64Comparator Comparator = func(left, right T) int {

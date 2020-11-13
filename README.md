@@ -25,6 +25,35 @@ replace github.com/youthlin/stream latest => gitee.com/youthlin/stream latest
 
 ```
 
+## Play online
+https://play.golang.org/p/vO8NEkdNXzY
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/youthlin/stream"
+	"github.com/youthlin/stream/types"
+)
+
+func main() {
+	m := stream.IntRange(0, 10).
+		Filter(func(e types.T) bool {
+			return e.(int)%2 == 0
+		}).
+		Map(func(e types.T) types.R {
+			return e.(int) * 2
+		}).
+		ReduceWith(map[int]string{}, func(m types.R, e types.T) types.R {
+			m.(map[int]string)[e.(int)] = fmt.Sprintf("<%d>", e)
+			return m
+		})
+	fmt.Println(m)
+}
+
+```
+
 ## Examples
 ```go
 
