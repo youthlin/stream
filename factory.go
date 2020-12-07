@@ -4,12 +4,14 @@ import (
 	"errors"
 	"reflect"
 
+	"github.com/youthlin/stream/optional"
 	"github.com/youthlin/stream/types"
 )
 
 var (
 	// ErrNotSlice a error to panic when call Slice but argument is not slice
 	ErrNotSlice = errors.New("not slice")
+	ErrNotMap   = errors.New("not map")
 )
 
 // Slice 把任意的切片类型转为[]T类型. 可用作 Of() 入参.
@@ -28,10 +30,69 @@ func Slice(slice types.T) []types.T {
 	return result
 }
 
+// Entries 把任意的 map 类型转为 []Pair
+// Entries return entries of a map as []types.Pair which `First` field is key, `Second` field is value
+func Entries(mapValue types.T) []types.Pair {
+	if reflect.TypeOf(mapValue).Kind() != reflect.Map {
+		panic(ErrNotMap)
+	}
+	value := reflect.ValueOf(mapValue)
+	var result []types.Pair
+	var it = value.MapRange()
+	for it.Next() {
+		result = append(result, types.Pair{
+			First:  it.Key().Interface(),
+			Second: it.Value().Interface(),
+		})
+	}
+	return result
+}
+
 // Of create a Stream from some element
 // It's recommend to pass pointer type cause the element may be copy at each operate
 func Of(elements ...types.T) Stream {
 	return newHead(it(elements...))
+}
+
+// OfSlice return a Stream. the input parameter `slice` must be a slice.
+// if input is nil, return a empty Stream( same as Of() )
+func OfSlice(slice types.T) Stream {
+	if optional.IsNil(slice) {
+		return Of()
+	}
+	if reflect.TypeOf(slice).Kind() != reflect.Slice {
+		panic(ErrNotSlice)
+	}
+	value := reflect.ValueOf(slice)
+	it := &sliceIt{
+		base: &base{
+			current: 0,
+			size:    value.Len(),
+		},
+		sliceValue: value,
+	}
+	return newHead(it)
+}
+
+// OfMap return a Stream which element type is types.Pair.
+// the input parameter `mapValue` must be a map or it will panic
+// if mapValue is nil, return a empty Stream ( same as Of() )
+func OfMap(mapValue types.T) Stream {
+	if optional.IsNil(mapValue) {
+		return Of()
+	}
+	if reflect.TypeOf(mapValue).Kind() != reflect.Map {
+		panic(ErrNotMap)
+	}
+	value := reflect.ValueOf(mapValue)
+	it := &mapIt{
+		base: &base{
+			current: 0,
+			size:    value.Len(),
+		},
+		mapValue: value.MapRange(),
+	}
+	return newHead(it)
 }
 
 // Iterate create a Stream by a seed and an UnaryOperator

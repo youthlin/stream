@@ -29,6 +29,10 @@ type (
 	// if left is greater then right, it returns a positive number;
 	// if left is less then right, it returns a negative number; if the two input are equal, it returns 0
 	Comparator func(left T, right T) int
+	Pair       struct {
+		First  T
+		Second R
+	}
 )
 
 var (
