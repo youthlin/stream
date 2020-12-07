@@ -114,6 +114,54 @@ func ExampleOf() {
 	// 2
 	// 1,2,3,4,
 }
+
+func ExampleOfSlice() {
+	var intArr = []int{1, 2, 3, 4}
+	stream.OfSlice(intArr).ForEach(func(e types.T) {
+		fmt.Printf("%d,", e)
+	})
+	var nilArr []int
+	stream.OfSlice(nilArr).ForEach(func(e types.T) {
+		fmt.Printf("should not print")
+	})
+	var strArr = []string{"a", "b"}
+	stream.OfSlice(strArr).
+		Map(func(e types.T) types.R {
+			return fmt.Sprintf("<%s>", e)
+		}).
+		ForEach(func(e types.T) {
+			fmt.Printf("%s,", e)
+		})
+	// Output:
+	// 1,2,3,4,<a>,<b>,
+}
+
+func ExampleOfMap() {
+	var m1 = map[int]string{
+		3: "c",
+		2: "b",
+		1: "a",
+	}
+	s := stream.OfMap(m1).
+		Map(func(e types.T) types.R {
+			p := e.(types.Pair)
+			p.First, p.Second = p.Second, p.First
+			return p
+		}).
+		Sorted(func(left types.T, right types.T) int {
+			p1 := left.(types.Pair)
+			p2 := right.(types.Pair)
+			return p1.Second.(int) - p2.Second.(int)
+		}).
+		ToSlice()
+	fmt.Println(s)
+	stream.OfMap(nil).ForEach(func(e types.T) {
+		fmt.Println("not print")
+	})
+	// Output:
+	// [{a 1} {b 2} {c 3}]
+}
+
 func ExampleStream_Filter() {
 	stream.Of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
 		Filter(func(e types.T) bool {

@@ -3,6 +3,7 @@ package stream_test
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/youthlin/stream"
@@ -18,6 +19,27 @@ func ExampleSlice() {
 	// []types.T{1, 2, 3}
 	// []types.T{"abc", "###"}
 }
+
+func ExampleEntries() {
+	var m1 = map[int]string{
+		1: "a",
+		2: "b",
+		3: "c",
+	}
+	entries := stream.Entries(m1)
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].First.(int) < entries[j].First.(int)
+	})
+	fmt.Printf("%v\n", entries)
+	stream.Of(stream.Slice(entries)...).ReduceWith(map[string]int{}, func(acc types.R, e types.T) types.R {
+		pair := e.(types.Pair)
+		(acc.(map[string]int))[pair.Second.(string)] = pair.First.(int)
+		return acc
+	})
+	// Output:
+	// [{1 a} {2 b} {3 c}]
+}
+
 func ExampleOf() {
 	fmt.Println(stream.Of().Count())
 	fmt.Println(stream.Of(1).Count())
@@ -32,6 +54,54 @@ func ExampleOf() {
 	// 2
 	// 1,2,3,4,
 }
+
+func ExampleOfSlice() {
+	var intArr = []int{1, 2, 3, 4}
+	stream.OfSlice(intArr).ForEach(func(e types.T) {
+		fmt.Printf("%d,", e)
+	})
+	var nilArr []int
+	stream.OfSlice(nilArr).ForEach(func(e types.T) {
+		fmt.Printf("should not print")
+	})
+	var strArr = []string{"a", "b"}
+	stream.OfSlice(strArr).
+		Map(func(e types.T) types.R {
+			return fmt.Sprintf("<%s>", e)
+		}).
+		ForEach(func(e types.T) {
+			fmt.Printf("%s,", e)
+		})
+	// Output:
+	// 1,2,3,4,<a>,<b>,
+}
+
+func ExampleOfMap() {
+	var m1 = map[int]string{
+		3: "c",
+		2: "b",
+		1: "a",
+	}
+	s := stream.OfMap(m1).
+		Map(func(e types.T) types.R {
+			p := e.(types.Pair)
+			p.First, p.Second = p.Second, p.First
+			return p
+		}).
+		Sorted(func(left types.T, right types.T) int {
+			p1 := left.(types.Pair)
+			p2 := right.(types.Pair)
+			return p1.Second.(int) - p2.Second.(int)
+		}).
+		ToSlice()
+	fmt.Println(s)
+	stream.OfMap(nil).ForEach(func(e types.T) {
+		fmt.Println("not print")
+	})
+	// Output:
+	// [{a 1} {b 2} {c 3}]
+}
+
 func ExampleIterate() {
 	// 0   1   1   2 3 5 8
 	// |   |  next

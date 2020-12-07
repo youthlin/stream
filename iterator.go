@@ -1,6 +1,10 @@
 package stream
 
-import "github.com/youthlin/stream/types"
+import (
+	"reflect"
+
+	"github.com/youthlin/stream/types"
+)
 
 const unknownSize = -1
 
@@ -12,8 +16,11 @@ type iterator interface {
 
 func it(elements ...types.T) iterator {
 	return &sliceIterator{
+		base: &base{
+			current: 0,
+			size:    len(elements),
+		},
 		elements: elements,
-		current:  0,
 	}
 }
 func withSeed(seed types.T, f types.UnaryOperator) iterator {
@@ -35,19 +42,24 @@ func withRange(fromInclude, toExclude endpoint, step int) iterator {
 	}
 }
 
+type base struct {
+	current int
+	size    int
+}
+
+func (b *base) GetSizeIfKnown() int64 {
+	return int64(b.size)
+}
+
+func (b *base) HasNext() bool {
+	return b.current < b.size
+}
+
 // region sliceIterator
 
 type sliceIterator struct {
+	*base
 	elements []types.T
-	current  int
-}
-
-func (s *sliceIterator) GetSizeIfKnown() int64 {
-	return int64(len(s.elements))
-}
-
-func (s *sliceIterator) HasNext() bool {
-	return s.current < len(s.elements)
 }
 
 func (s *sliceIterator) Next() types.T {
@@ -57,6 +69,37 @@ func (s *sliceIterator) Next() types.T {
 }
 
 // endregion sliceIterator
+
+// region sliceIt
+
+// sliceIt 切片迭代器 反射实现
+// sliceIt a slice iterator implement with reflect.Value
+type sliceIt struct {
+	*base
+	sliceValue reflect.Value
+}
+
+func (s *sliceIt) Next() types.T {
+	e := s.sliceValue.Index(s.current).Interface()
+	s.current++
+	return e
+}
+
+// endregion sliceIt
+
+type mapIt struct {
+	*base
+	mapValue *reflect.MapIter
+}
+
+func (m *mapIt) Next() types.T {
+	m.base.current++
+	m.mapValue.Next()
+	return types.Pair{
+		First:  m.mapValue.Key().Interface(),
+		Second: m.mapValue.Value().Interface(),
+	}
+}
 
 // region seedIt
 
