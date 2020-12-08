@@ -70,6 +70,61 @@ func (s *sliceIterator) Next() types.T {
 
 // endregion sliceIterator
 
+type intsIt struct {
+	*base
+	elements []int
+}
+
+func (i *intsIt) Next() types.T {
+	e := i.elements[i.current]
+	i.current++
+	return e
+}
+
+type int64sIt struct {
+	*base
+	elements []int64
+}
+
+func (i *int64sIt) Next() types.T {
+	e := i.elements[i.current]
+	i.current++
+	return e
+}
+
+type float32sIt struct {
+	*base
+	elements []float32
+}
+
+func (i *float32sIt) Next() types.T {
+	e := i.elements[i.current]
+	i.current++
+	return e
+}
+
+type float64sIt struct {
+	*base
+	elements []float64
+}
+
+func (i *float64sIt) Next() types.T {
+	e := i.elements[i.current]
+	i.current++
+	return e
+}
+
+type stringIt struct {
+	*base
+	elements []string
+}
+
+func (i *stringIt) Next() types.T {
+	e := i.elements[i.current]
+	i.current++
+	return e
+}
+
 // region sliceIt
 
 // sliceIt 切片迭代器 反射实现
