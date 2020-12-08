@@ -1,4 +1,5 @@
 # Go Stream
+
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/youthlin/stream)](https://pkg.go.dev/github.com/youthlin/stream)
 [![Go Report Card](https://goreportcard.com/badge/github.com/youthlin/stream)](https://goreportcard.com/report/github.com/youthlin/stream)
 [![Build Status](https://travis-ci.org/youthlin/stream.svg?branch=main)](https://travis-ci.org/youthlin/stream)
@@ -9,6 +10,7 @@ Go Stream, like Java 8 Stream.
 Blog Post: https://youthlin.com/?p=1755
 
 ## How to get
+
 ```shell script
 go get github.com/youthlin/stream
 ```
@@ -16,6 +18,7 @@ go get github.com/youthlin/stream
 国内镜像: https://gitee.com/youthlin/stream  
 在 `go.mod` 中引入模块路径 `github.com/youthlin/stream` 及版本后，  
 再添加 replace 即可：
+
 ```go
 // go.mod
 
@@ -26,7 +29,9 @@ replace github.com/youthlin/stream latest => gitee.com/youthlin/stream latest
 ```
 
 ## Play online
-https://play.golang.org/p/vO8NEkdNXzY
+
+https://play.golang.org/p/nPQJYqA3-Jr
+
 ```go
 package main
 
@@ -45,16 +50,19 @@ func main() {
 		Map(func(e types.T) types.R {
 			return e.(int) * 2
 		}).
-		ReduceWith(map[int]string{}, func(m types.R, e types.T) types.R {
-			m.(map[int]string)[e.(int)] = fmt.Sprintf("<%d>", e)
+		ReduceWith(map[int]string{}, func(acc types.R, e types.T) types.R {
+			m := acc.(map[int]string)
+			m[e.(int)] = fmt.Sprintf("<%d>", e)
 			return m
 		})
 	fmt.Println(m)
+	// Output:
+	// map[0:<0> 4:<4> 8:<8> 12:<12> 16:<16>]
 }
-
 ```
 
 ## Examples
+
 ```go
 
 type Stream interface {
@@ -218,3 +226,15 @@ func TestToMap(t *testing.T) {
 }
 
 ```
+
+## Change Log
+
+- v0.0.3 2020-12-08 add factory method: OfInts, OfInt64s, OfFloat32s, OfFloat64s, OfStrings;  
+  add Stream method: ReduceBy
+- v0.0.2 2020-12-07 add factory method: OfSlice, OfMap
+- v0.0.1 2020-11-12 first version
+
+## Todo
+
+- [ ] add Benchmark test
+- [ ] support parallel stream
