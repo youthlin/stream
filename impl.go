@@ -234,17 +234,16 @@ func (s *stream) ForEach(consumer types.Consumer) {
 
 // ToSlice 转为切片
 func (s *stream) ToSlice() []types.T {
-	var slice []types.T
-	s.terminal(newTerminalStage(func(t types.T) {
-		slice = append(slice, t)
-	}, begin(func(size int64) {
-		if size > 0 {
-			slice = make([]types.T, 0, size)
-		} else {
-			slice = make([]types.T, 0)
+	return s.ReduceBy(func(count int64) types.R {
+		if count >= 0 {
+			return make([]types.T, 0, count)
 		}
-	})))
-	return slice
+		return make([]types.T, 0)
+	}, func(acc types.R, t types.T) types.R {
+		slice := acc.([]types.T)
+		slice = append(slice, t)
+		return slice
+	}).([]types.T)
 }
 
 // ToElementSlice needs a argument cause the stream may be empty
@@ -255,17 +254,17 @@ func (s *stream) ToElementSlice(some types.T) types.R {
 // ToRealSlice
 func (s *stream) ToSliceOf(typ reflect.Type) types.R {
 	sliceType := reflect.SliceOf(typ)
-	var sliceValue reflect.Value
-	s.terminal(newTerminalStage(func(t types.T) {
-		sliceValue = reflect.Append(sliceValue, reflect.ValueOf(t))
-	}, begin(func(size int64) {
-		if size > 0 {
-			sliceValue = reflect.MakeSlice(sliceType, 0, int(size))
-		} else {
-			sliceValue = reflect.MakeSlice(sliceType, 0, 0)
+	return s.ReduceBy(func(size int64) types.R {
+		if size >= 0 {
+			return reflect.MakeSlice(sliceType, 0, int(size))
 		}
-	})))
-	return sliceValue.Interface()
+		return reflect.MakeSlice(sliceType, 0, 16)
+	}, func(acc types.R, t types.T) types.R {
+		sliceValue := acc.(reflect.Value)
+		sliceValue = reflect.Append(sliceValue, reflect.ValueOf(t))
+		return sliceValue
+	}).(reflect.Value).
+		Interface()
 }
 
 // AllMatch 测试是否所有元素符合断言
@@ -324,7 +323,7 @@ func (s *stream) Reduce(accumulator types.BinaryOperator) optional.Optional {
 	return optional.Empty()
 }
 
-// ReduceFrom 从给定的初始值 identity(类型和元素类型相同) 开始迭代 使用 accumulator(2个入参类型和返回类型相同) 累计结果
+// ReduceFrom 从给定的初始值 initValue(类型和元素类型相同) 开始迭代 使用 accumulator(2个入参类型和返回类型相同) 累计结果
 func (s *stream) ReduceFrom(initValue types.T, accumulator types.BinaryOperator) types.T {
 	var result = initValue
 	s.terminal(newTerminalStage(func(t types.T) {
@@ -333,12 +332,25 @@ func (s *stream) ReduceFrom(initValue types.T, accumulator types.BinaryOperator)
 	return result
 }
 
-// ReduceWith 使用给定的初始值 identity(类型和元素类型不同) 开始迭代 使用 accumulator( R + T -> R) 累计结果
+// ReduceWith 使用给定的初始值 initValue(类型和元素类型不同) 开始迭代 使用 accumulator( R + T -> R) 累计结果
 func (s *stream) ReduceWith(initValue types.R, accumulator func(types.R, types.T) types.R) types.R {
 	var result = initValue
 	s.terminal(newTerminalStage(func(t types.T) {
 		result = accumulator(result, t)
 	}))
+	return result
+}
+
+// ReduceBy 使用给定的初始化方法(参数是元素个数，或-1)生成 initValue, 然后使用 accumulator 累计结果
+// ReduceBy use `buildInitValue` to build the initValue, which parameter is a int64 means element size, or -1 if unknown size.
+// Then use `accumulator` to add each element to previous result
+func (s *stream) ReduceBy(buildInitValue func(int64) types.R, accumulator func(types.R, types.T) types.R) types.R {
+	var result types.R
+	s.terminal(newTerminalStage(func(e types.T) {
+		result = accumulator(result, e)
+	}, begin(func(count int64) {
+		result = buildInitValue(count)
+	})))
 	return result
 }
 

@@ -54,6 +54,52 @@ func Of(elements ...types.T) Stream {
 	return newHead(it(elements...))
 }
 
+func OfInts(element ...int) Stream {
+	return newHead(&intsIt{
+		base: &base{
+			current: 0,
+			size:    len(element),
+		},
+		elements: element,
+	})
+}
+func OfInt64s(element ...int64) Stream {
+	return newHead(&int64sIt{
+		base: &base{
+			current: 0,
+			size:    len(element),
+		},
+		elements: element,
+	})
+}
+func OfFloat32s(element ...float32) Stream {
+	return newHead(&float32sIt{
+		base: &base{
+			current: 0,
+			size:    len(element),
+		},
+		elements: element,
+	})
+}
+func OfFloat64s(element ...float64) Stream {
+	return newHead(&float64sIt{
+		base: &base{
+			current: 0,
+			size:    len(element),
+		},
+		elements: element,
+	})
+}
+func OfStrings(element ...string) Stream {
+	return newHead(&stringIt{
+		base: &base{
+			current: 0,
+			size:    len(element),
+		},
+		elements: element,
+	})
+}
+
 // OfSlice return a Stream. the input parameter `slice` must be a slice.
 // if input is nil, return a empty Stream( same as Of() )
 func OfSlice(slice types.T) Stream {

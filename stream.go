@@ -47,7 +47,10 @@ type Stream interface {
 	// type of initValue is same as element.  (T, T) -> T
 	ReduceFrom(initValue types.T, accumulator types.BinaryOperator) types.T
 	// type of initValue is different from element. (R, T) -> R
-	ReduceWith(initValue types.R, accumulator func(types.R, types.T) types.R) types.R
+	ReduceWith(initValue types.R, accumulator func(acc types.R, e types.T) types.R) types.R
+	// ReduceBy use `buildInitValue` to build the initValue, which parameter is a int64 means element size, or -1 if unknown size.
+	// Then use `accumulator` to add each element to previous result
+	ReduceBy(buildInitValue func(sizeMayNegative int64) types.R, accumulator func(acc types.R, e types.T) types.R) types.R
 	FindFirst() optional.Optional
 	// 返回元素个数
 	Count() int64

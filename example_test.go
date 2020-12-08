@@ -55,6 +55,47 @@ func ExampleOf() {
 	// 1,2,3,4,
 }
 
+func ExampleOfInts() {
+	var ints = []int{1, 2, 3, 4}
+	stream.OfInts(ints...).ForEach(func(e types.T) {
+		fmt.Printf("%d,", e)
+	})
+	// Output:
+	// 1,2,3,4,
+}
+func ExampleOfInt64s() {
+	var ints = []int64{1, 2, 3, 4}
+	stream.OfInt64s(ints...).ForEach(func(e types.T) {
+		fmt.Printf("%d(%T),", e, e)
+	})
+	// Output:
+	// 1(int64),2(int64),3(int64),4(int64),
+}
+func ExampleOfFloat32s() {
+	var ints = []float32{1, 2, 3, 4}
+	stream.OfFloat32s(ints...).ForEach(func(e types.T) {
+		fmt.Printf("%v(%T),", e, e)
+	})
+	// Output:
+	// 1(float32),2(float32),3(float32),4(float32),
+}
+func ExampleOfFloat64s() {
+	var ints = []float64{1, 2, 3, 4}
+	stream.OfFloat64s(ints...).ForEach(func(e types.T) {
+		fmt.Printf("%v(%T),", e, e)
+	})
+	// Output:
+	// 1(float64),2(float64),3(float64),4(float64),
+}
+func ExampleOfStrings() {
+	var ints = []string{"a", "b", "c"}
+	stream.OfStrings(ints...).ForEach(func(e types.T) {
+		fmt.Printf("%v(%T),", e, e)
+	})
+	// Output:
+	// a(string),b(string),c(string),
+}
+
 func ExampleOfSlice() {
 	var intArr = []int{1, 2, 3, 4}
 	stream.OfSlice(intArr).ForEach(func(e types.T) {
@@ -386,6 +427,7 @@ func ExampleStream_AnyMatch() {
 	// true true
 	// false
 }
+
 func ExampleStream_Reduce() {
 	fmt.Println(stream.Of().Reduce(func(acc types.T, t types.T) types.T {
 		return acc
@@ -414,6 +456,38 @@ func ExampleStream_ReduceWith() {
 	// Output:
 	// []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 }
+func ExampleStream_ReduceBy() {
+	ints := stream.IntRange(0, 10).ReduceBy(func(sizeMayNegative int64) types.R {
+		if sizeMayNegative >= 0 {
+			return make([]int, 0, sizeMayNegative)
+		}
+		fmt.Printf("IntRange: unknown size\n")
+		return make([]int, 0)
+	}, func(acc types.R, e types.T) types.R {
+		result := acc.([]int)
+		result = append(result, e.(int))
+		return result
+	}).([]int)
+	fmt.Printf("%v\n", ints)
+	int64s := stream.OfInts(ints...).ReduceBy(func(sizeMayNegative int64) types.R {
+		if sizeMayNegative >= 0 {
+			fmt.Printf("size=%d\n", sizeMayNegative)
+			return make([]int64, 0, sizeMayNegative)
+		}
+		return make([]int64, 0)
+	}, func(acc types.R, e types.T) types.R {
+		result := acc.([]int64)
+		result = append(result, int64(e.(int)))
+		return result
+	}).([]int64)
+	fmt.Printf("%v\n", int64s)
+	// Output:
+	// IntRange: unknown size
+	// [0 1 2 3 4 5 6 7 8 9]
+	// size=10
+	// [0 1 2 3 4 5 6 7 8 9]
+}
+
 func ExampleStream_Count() {
 	fmt.Println(stream.Of().Count())
 	fmt.Println(stream.Of(1).Count())
